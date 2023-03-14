@@ -3,7 +3,7 @@ import {ethers} from 'ethers';
 import type {TTxResponse} from '@yearn-finance/web-lib/utils/web3/transaction';
 
 export async function	isApprovedERC20(
-	provider: ethers.providers.Web3Provider,
+	provider: ethers.providers.JsonRpcProvider,
 	tokenAddress: string,
 	spender: string,
 	amount = ethers.constants.MaxUint256
@@ -25,7 +25,7 @@ export async function	isApprovedERC20(
 }
 
 export async function	approvedERC20Amount(
-	provider: ethers.providers.Web3Provider,
+	provider: ethers.providers.JsonRpcProvider,
 	tokenAddress: string,
 	spender: string
 ): Promise<ethers.BigNumber> {
@@ -45,7 +45,7 @@ export async function	approvedERC20Amount(
 }
 
 export async function	approveERC20(
-	provider: ethers.providers.Web3Provider,
+	provider: ethers.providers.JsonRpcProvider,
 	tokenAddress: string,
 	spender: string,
 	amount = ethers.constants.MaxUint256

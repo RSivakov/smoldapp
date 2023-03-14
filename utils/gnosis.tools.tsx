@@ -16,6 +16,15 @@ const ERC20ABI_TRANSFER: AbiItem = {
 	inputs: [{name: '_to', type: 'address'}, {name: '_value', type: 'uint256'}],
 	outputs: [{name: '', type: 'bool'}]
 };
+const ERC20ABI_APPROVE: AbiItem = {
+	constant: false,
+	payable: false,
+	name: 'approve',
+	type: 'function',
+	stateMutability: 'nonpayable',
+	inputs: [{name: 'spender', type: 'address'}, {name: 'amount', type: 'uint256'}],
+	outputs: [{name: '', type: 'bool'}]
+};
 const ERC1155_TRANSFERBATCH: AbiItem = {
 	constant: false,
 	payable: false,
@@ -45,6 +54,15 @@ const ERC721_TRANSFER: AbiItem = {
 	],
 	outputs: []
 };
+const GPV2SETTLEMENTABI_APPROVE: AbiItem = {
+	constant: false,
+	payable: false,
+	name: 'setPreSignature',
+	type: 'function',
+	stateMutability: 'nonpayable',
+	inputs: [{name: 'orderUid', type: 'bytes'}, {name: 'signed', type: 'bool'}],
+	outputs: []
+};
 
 export function getTransferTransaction(
 	amount: string,
@@ -63,7 +81,18 @@ export function getTransferTransaction(
 		data: coder.encodeFunctionCall(ERC20ABI_TRANSFER, [recipient, amount])
 	};
 }
-
+export function getApproveTransaction(
+	amount: string,
+	token: TAddress,
+	spender: TAddress
+): BaseTransaction {
+	const coder = abiCoder as unknown as AbiCoder;
+	return {
+		to: token,
+		value: '0',
+		data: coder.encodeFunctionCall(ERC20ABI_APPROVE, [spender, amount])
+	};
+}
 export function getSafeBatchTransferFrom1155(
 	collection: TAddress,
 	from: TAddress,
@@ -86,7 +115,6 @@ export function getSafeBatchTransferFrom1155(
 		)
 	};
 }
-
 export function getSafeTransferFrom721(
 	collection: TAddress,
 	from: TAddress,
@@ -105,5 +133,17 @@ export function getSafeTransferFrom721(
 				'0x'
 			]
 		)
+	};
+}
+export function getSetPreSignatureTransaction(
+	contract: TAddress,
+	orderUID: string,
+	signed: boolean
+): BaseTransaction {
+	const coder = abiCoder as unknown as AbiCoder;
+	return {
+		to: contract,
+		value: '0',
+		data: coder.encodeFunctionCall(GPV2SETTLEMENTABI_APPROVE, [orderUID, String(signed)])
 	};
 }

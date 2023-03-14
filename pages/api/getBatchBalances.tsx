@@ -1,14 +1,13 @@
 
 
 import {Contract} from 'ethcall';
-import {ethers} from 'ethers';
 import ERC20_ABI from '@yearn-finance/web-lib/utils/abi/erc20.abi';
 import {toAddress} from '@yearn-finance/web-lib/utils/address';
 import {ETH_TOKEN_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
 import {toNormalizedValue} from '@yearn-finance/web-lib/utils/format.bigNumber';
 import {getProvider, newEthCallProvider} from '@yearn-finance/web-lib/utils/web3/providers';
 
-import type {BigNumber} from 'ethers';
+import type {BigNumber, ethers} from 'ethers';
 import type {TMinBalanceData, TUseBalancesTokens} from 'hooks/useBalances';
 import type {NextApiRequest, NextApiResponse} from 'next';
 import type {TDict} from '@yearn-finance/web-lib/types';
@@ -25,7 +24,8 @@ async function getBatchBalances({
 }: TPerformCall): Promise<TDict<TMinBalanceData>> {
 	let	currentProvider: ethers.providers.JsonRpcProvider;
 	if (chainID === 1337) {
-		currentProvider = new ethers.providers.JsonRpcProvider('http://0.0.0.0:8545');
+		currentProvider = getProvider(1);
+		// currentProvider = new ethers.providers.JsonRpcProvider('http://0.0.0.0:8545');
 	} else {
 		currentProvider = getProvider(chainID);
 	}

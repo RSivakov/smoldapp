@@ -19,8 +19,9 @@ type TViewWalletProps = {
 
 function	ViewWallet({onSelect}: TViewWalletProps): ReactElement {
 	const	{onConnect, walletType} = useWeb3();
-	const	detectedWalletProvider = useInjectedWallet();
 	const	{walletProvider, set_walletProvider} = useWallet();
+	const	detectedWalletProvider = useInjectedWallet();
+	const	isEmbedWallet = useMemo((): boolean => ['EMBED_LEDGER', 'EMBED_GNOSIS_SAFE'].includes(walletType), [walletType]);
 
 	const	onSelectWallet = useCallback(async (walletType: string): Promise<void> => {
 		try {
@@ -67,12 +68,14 @@ function	ViewWallet({onSelect}: TViewWalletProps): ReactElement {
 					<div className={'col-span-12 mt-6 grid grid-cols-12 gap-4 md:gap-6'}>
 						<div className={'relative col-span-6 md:col-span-3'}>
 							<CardWithIcon
-								isSelected={walletProvider === 'INJECTED' || walletType === 'INJECTED' || ['EMBED_LEDGER', 'EMBED_GNOSIS_SAFE'].includes(walletType)}
+								isSelected={walletProvider === 'INJECTED' || walletType === 'INJECTED' || isEmbedWallet}
 								icon={detectedWallet.icon}
 								label={detectedWallet.name}
-								onClick={async (): Promise<void> => ['EMBED_LEDGER', 'EMBED_GNOSIS_SAFE'].includes(walletType) ? undefined : onSelectWallet('INJECTED')} />
+								onClick={async (): Promise<void> => isEmbedWallet ? undefined : onSelectWallet('INJECTED')} />
 						</div>
-						<div className={`relative col-span-6 md:col-span-3 ${['EMBED_LEDGER', 'EMBED_GNOSIS_SAFE'].includes(walletType) ? 'hidden' : 'flex'}`}>
+						<div
+							suppressHydrationWarning
+							className={`relative col-span-6 md:col-span-3 ${isEmbedWallet ? 'hidden' : 'flex'}`}>
 							<CardWithIcon
 								isSelected={walletProvider === 'WALLET_CONNECT' || walletType === 'WALLET_CONNECT'}
 								icon={<IconWalletWalletConnect />}

@@ -4,31 +4,28 @@ import {useWeb3} from '@yearn-finance/web-lib/contexts/useWeb3';
 import {ETH_TOKEN_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
 import performBatchedUpdates from '@yearn-finance/web-lib/utils/performBatchedUpdates';
 
-import type {TCowAPIResult} from 'hooks/useSolverCowswap';
+import type {TCowQuote} from 'hooks/useSolverCowswap';
 import type {Dispatch, SetStateAction} from 'react';
-import type {TAddress} from '@yearn-finance/web-lib/utils/address';
+import type {TAddress, TDict} from '@yearn-finance/web-lib/types';
 import type {TNormalizedBN} from '@yearn-finance/web-lib/utils/format.bigNumber';
-import type {TDict} from '@yearn-finance/web-lib/utils/types';
 import type {TTokenInfo} from './useTokenList';
 
 export enum	Step {
 	WALLET = 'wallet',
 	DESTINATION = 'destination',
 	SELECTOR = 'selector',
-	APPROVALS = 'approval',
-	SIGN = 'sign',
-	CONFIRMATION = 'confirmation'
+	APPROVALS = 'approval'
 }
 
 export type TSelected = {
 	selected: TAddress[],
 	amounts: TDict<TNormalizedBN>,
-	quotes: TDict<TCowAPIResult>,
+	quotes: TDict<TCowQuote>,
 	destination: TTokenInfo,
 	currentStep: Step,
 	set_selected: Dispatch<SetStateAction<TAddress[]>>,
 	set_amounts: Dispatch<SetStateAction<TDict<TNormalizedBN>>>,
-	set_quotes: Dispatch<SetStateAction<TDict<TCowAPIResult>>>,
+	set_quotes: Dispatch<SetStateAction<TDict<TCowQuote>>>,
 	set_currentStep: Dispatch<SetStateAction<Step>>,
 	set_destination: Dispatch<SetStateAction<TTokenInfo>>
 }
@@ -53,36 +50,61 @@ const	defaultProps: TSelected = {
 	set_destination: (): void => undefined
 };
 
+
+function scrollToTargetAdjusted(element: HTMLElement): void {
+	const headerOffset = 81 - 16;
+	if (!element) {
+		return;
+	}
+	const elementPosition = element.getBoundingClientRect().top;
+	const offsetPosition = elementPosition + window.scrollY - headerOffset;
+	window.scrollTo({
+		top: Math.round(offsetPosition),
+		behavior: 'smooth'
+	});
+}
+
 const	SweepooorContext = createContext<TSelected>(defaultProps);
 export const SweepooorContextApp = ({children}: {children: React.ReactElement}): React.ReactElement => {
 	const	{address, isActive, walletType} = useWeb3();
 	const	[selected, set_selected] = useState<TAddress[]>(defaultProps.selected);
 	const	[destination, set_destination] = useState<TTokenInfo>(defaultProps.destination);
-	const	[quotes, set_quotes] = useState<TDict<TCowAPIResult>>(defaultProps.quotes);
+	const	[quotes, set_quotes] = useState<TDict<TCowQuote>>(defaultProps.quotes);
 	const	[amounts, set_amounts] = useState<TDict<TNormalizedBN>>(defaultProps.amounts);
 	const	[currentStep, set_currentStep] = useState<Step>(Step.WALLET);
 
 	useEffect((): void => {
 		if (!isActive) {
 			performBatchedUpdates((): void => {
-				set_selected([]);
-				set_amounts({});
+				set_selected(defaultProps.selected);
+				set_amounts(defaultProps.amounts);
+				set_destination(defaultProps.destination);
 			});
 		}
 	}, [isActive]);
 
-	useUpdateEffect((): void => {
-		if (isActive && address) {
+	/**********************************************************************************************
+	** This effect is used to directly jump the UI to the DESTINATION section if the wallet is
+	** already connected or if the wallet is a special wallet type (e.g. EMBED_LEDGER).
+	** If the wallet is not connected, jump to the WALLET section to connect.
+	**********************************************************************************************/
+	useEffect((): void => {
+		const isEmbedWallet = ['EMBED_LEDGER', 'EMBED_GNOSIS_SAFE'].includes(walletType);
+		if ((isActive && address) || isEmbedWallet) {
 			set_currentStep(Step.DESTINATION);
 		} else if (!isActive || !address) {
 			set_currentStep(Step.WALLET);
 		}
-	}, [address, isActive]);
+	}, [address, isActive, walletType]);
 
+	/**********************************************************************************************
+	** This effect is used to handle some UI transitions and sections jumps. Once the current step
+	** changes, we need to scroll to the correct section.
+	** This effect is triggered only on mount to set the initial scroll position.
+	**********************************************************************************************/
 	useMountEffect((): void => {
 		setTimeout((): void => {
 			const	isEmbedWallet = ['EMBED_LEDGER', 'EMBED_GNOSIS_SAFE'].includes(walletType);
-
 			if (currentStep === Step.WALLET && !isEmbedWallet) {
 				document?.getElementById('wallet')?.scrollIntoView({behavior: 'smooth', block: 'start'});
 			} else if (currentStep === Step.DESTINATION || isEmbedWallet) {
@@ -95,6 +117,12 @@ export const SweepooorContextApp = ({children}: {children: React.ReactElement}):
 		}, 0);
 	});
 
+	/**********************************************************************************************
+	** This effect is used to handle some UI transitions and sections jumps. Once the current step
+	** changes, we need to scroll to the correct section.
+	** This effect is ignored on mount but will be triggered on every update to set the correct
+	** scroll position.
+	**********************************************************************************************/
 	useUpdateEffect((): void => {
 		setTimeout((): void => {
 			let currentStepContainer;
@@ -113,11 +141,13 @@ export const SweepooorContextApp = ({children}: {children: React.ReactElement}):
 			}
 			const	currentElementHeight = currentStepContainer?.offsetHeight;
 			if (scalooor?.style) {
-				scalooor.style.height = `calc(100vh - ${currentElementHeight}px - ${headerHeight}px + 16px)`;
+				scalooor.style.height = `calc(100vh - ${currentElementHeight}px - ${headerHeight}px + 36px)`;
 			}
-			currentStepContainer?.scrollIntoView({behavior: 'smooth', block: 'start'});
-		}, 100);
-	}, [currentStep]);
+			if (currentStepContainer) {
+				scrollToTargetAdjusted(currentStepContainer);
+			}
+		}, 0);
+	}, [currentStep, walletType]);
 
 	const	contextValue = useMemo((): TSelected => ({
 		selected,
