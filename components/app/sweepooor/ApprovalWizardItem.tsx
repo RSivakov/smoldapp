@@ -214,7 +214,10 @@ function	ApprovalWizardItem({
 						</span>
 						{` ${balances?.[toAddress(token)]?.symbol || 'Tokens'} for at least `}
 						<span className={'font-number font-bold'}>
-							{formatAmount(Number(toNormalizedBN(currentQuote?.quote?.buyAmount || '').normalized), 6, 6)}
+							{formatAmount(Number(toNormalizedBN(
+								currentQuote?.quote?.buyAmount || '',
+								currentQuote?.outputTokenDecimals || 18
+							).normalized), 6, 6)}
 						</span>
 						{` ${destination.symbol}`}
 					</div>

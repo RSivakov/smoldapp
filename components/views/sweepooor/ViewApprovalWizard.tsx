@@ -261,11 +261,13 @@ function	StandardFlow({onUpdateApprovalStep, onUpdateSignStep}: {
 	** approved and signed.
 	** If so, the onSendOrders function will be called.
 	**********************************************************************************************/
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	const	areAllApproved = useMemo((): boolean => (
 		selected.length > 0 &&
 		Object.values(approveStatus).length === selected.length && Object.values(approveStatus).every((status): boolean => status)
 	), [approveStatus, selected]);
 
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	const	areAllSigned = useMemo((): boolean => (
 		selected.length > 0 &&
 		Object.values(quotes).length === selected.length && Object.values(quotes).every((quote): boolean => (quote?.signature || '') !== '')

@@ -40,7 +40,10 @@ const	TokenRowInput = memo(function TokenRowInput({tokenAddress, balance, isSele
 	** On error, we try to display a meaningful message to the user and we disable the token
 	** if it's not supported or if the fee is too high.
 	**********************************************************************************************/
-	const	onEstimateQuote = useCallback(async (rawAmount = amount?.raw): Promise<void> => {
+	const	onEstimateQuote = useCallback(async (rawAmount = amount?.raw, force = false): Promise<void> => {
+		if (!isSelected && !force) {
+			return;
+		}
 		performBatchedUpdates((): void => {
 			set_error('');
 			set_isLoadingQuote(true);
@@ -197,7 +200,7 @@ const	TokenRowInput = memo(function TokenRowInput({tokenAddress, balance, isSele
 				return s;
 			});
 		});
-		onEstimateQuote(balance?.raw);
+		onEstimateQuote(balance?.raw, true);
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [balance, onEstimateQuote, tokenAddress]);
 

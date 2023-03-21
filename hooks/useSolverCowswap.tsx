@@ -135,7 +135,7 @@ export function useSolverCowswap(): TSolverContext {
 			];
 		}
 		return [
-			toNormalizedBN(minFeeAmount || 0, _request?.outputToken?.decimals || 18),
+			toNormalizedBN(minFeeAmount || 0, _request?.inputToken?.decimals || 18),
 			undefined,
 			false,
 			error
