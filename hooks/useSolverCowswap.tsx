@@ -1,4 +1,4 @@
-import {useCallback, useMemo, useRef} from 'react';
+import {useCallback, useMemo} from 'react';
 import {ethers} from 'ethers';
 import axios from 'axios';
 import {domain, OrderKind, SigningScheme, signOrder} from '@gnosis.pm/gp-v2-contracts';
@@ -54,7 +54,6 @@ export function useSolverCowswap(): TSolverContext {
 	const {toast} = yToast();
 	const maxIterations = 1000; // 1000 * up to 3 seconds = 3000 seconds = 50 minutes
 	const [zapSlippage] = useLocalStorage<number>('migratooor/zap-slippage', 0.1);
-	const request = useRef<TInitSolverArgs>();
 
 	const getQuote = useCallback(async (
 		request: TInitSolverArgs,
@@ -126,17 +125,17 @@ export function useSolverCowswap(): TSolverContext {
 	]> => {
 		const [quote, minFeeAmount, error] = await getQuote(_request);
 		if (quote) {
-			const buyAmountWithSlippage = getBuyAmountWithSlippage(quote.quote, request?.current?.outputToken?.decimals || 18);
+			const buyAmountWithSlippage = getBuyAmountWithSlippage(quote.quote, _request?.outputToken?.decimals || 18);
 			quote.request = _request;
 			return [
-				toNormalizedBN(buyAmountWithSlippage || 0, request?.current?.outputToken?.decimals || 18),
+				toNormalizedBN(buyAmountWithSlippage || 0, _request?.outputToken?.decimals || 18),
 				quote,
 				true,
 				error
 			];
 		}
 		return [
-			toNormalizedBN(minFeeAmount || 0, request?.current?.outputToken?.decimals || 18),
+			toNormalizedBN(minFeeAmount || 0, _request?.outputToken?.decimals || 18),
 			undefined,
 			false,
 			error
