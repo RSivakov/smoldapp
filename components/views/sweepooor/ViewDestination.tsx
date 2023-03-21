@@ -24,7 +24,7 @@ function	ViewDestination(): ReactElement {
 	** Only the tokens in that list will be displayed as possible destinations.
 	**********************************************************************************************/
 	useMountEffect((): void => {
-		axios.get('https://raw.githubusercontent.com/Migratooor/tokenLists/main/lists/1/cowswap.json').then((response): void => {
+		axios.get('https://raw.githubusercontent.com/Migratooor/tokenLists/main/lists/yearn.json').then((response): void => {
 			const	tokenListResponse = response.data as TTokenList;
 			const	possibleDestinationsTokens: TDict<TTokenInfo> = {};
 			possibleDestinationsTokens[ETH_TOKEN_ADDRESS] = {
