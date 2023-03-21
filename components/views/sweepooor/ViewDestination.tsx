@@ -24,8 +24,12 @@ function	ViewDestination(): ReactElement {
 	** Only the tokens in that list will be displayed as possible destinations.
 	**********************************************************************************************/
 	useMountEffect((): void => {
-		axios.get('https://raw.githubusercontent.com/Migratooor/tokenLists/main/lists/1/cowswap.json').then((response): void => {
-			const	tokenListResponse = response.data as TTokenList;
+		axios.all([
+			axios.get('https://raw.githubusercontent.com/Migratooor/tokenLists/main/lists/1/cowswap.json'),
+			axios.get('https://raw.githubusercontent.com/Migratooor/tokenLists/main/lists/1/yearn.json')
+		]).then(axios.spread((cowswapResponse, yearnResponse): void => {
+			const	cowswapTokenListResponse = cowswapResponse.data as TTokenList;
+			const	yearnTokenListResponse = yearnResponse.data as TTokenList;
 			const	possibleDestinationsTokens: TDict<TTokenInfo> = {};
 			possibleDestinationsTokens[ETH_TOKEN_ADDRESS] = {
 				address: ETH_TOKEN_ADDRESS,
@@ -35,11 +39,16 @@ function	ViewDestination(): ReactElement {
 				decimals: 18,
 				logoURI: `https://raw.githubusercontent.com/yearn/yearn-assets/master/icons/multichain-tokens/1/${ETH_TOKEN_ADDRESS}/logo-128.png`
 			};
-			for (const eachToken of tokenListResponse.tokens) {
+			for (const eachToken of cowswapTokenListResponse.tokens) {
 				possibleDestinationsTokens[toAddress(eachToken.address)] = eachToken;
 			}
+			for (const eachToken of yearnTokenListResponse.tokens) {
+				if (eachToken.symbol.startsWith('yv')) {
+					possibleDestinationsTokens[toAddress(eachToken.address)] = eachToken;
+				}
+			}
 			set_possibleDestinations(possibleDestinationsTokens);
-		});
+		}));
 	});
 
 	/* 🔵 - Yearn Finance **************************************************************************
