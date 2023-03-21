@@ -43,7 +43,7 @@ function ComboboxOption({option}: {option: TTokenInfo}): ReactElement {
 						) : <div className={'h-6 w-6 rounded-full bg-neutral-0'} />}
 					</div>
 					<div className={'flex flex-col font-sans text-neutral-900'}>
-						{option.name}
+						{option.symbol}
 						<small className={'font-number text-xs text-neutral-500'}>{toAddress(option.address)}</small>
 					</div>
 					{isSelected ? (
