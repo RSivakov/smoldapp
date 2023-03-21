@@ -41,9 +41,6 @@ const	TokenRowInput = memo(function TokenRowInput({tokenAddress, balance, isSele
 	** if it's not supported or if the fee is too high.
 	**********************************************************************************************/
 	const	onEstimateQuote = useCallback(async (rawAmount = amount?.raw): Promise<void> => {
-		if (!isSelected) {
-			return;
-		}
 		performBatchedUpdates((): void => {
 			set_error('');
 			set_isLoadingQuote(true);
