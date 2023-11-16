@@ -68,7 +68,7 @@
 		"postcss-import": "^15.1.0",
 		"postcss-nesting": "^11.2.2",
 		"sass": "^1.62.1",
-		"sharp": "^0.32.1",
+		"sharp": "^0.32.6",
 		"ts-loader": "^9.4.3",
 		"typescript": "^5.1.3"
 	}
